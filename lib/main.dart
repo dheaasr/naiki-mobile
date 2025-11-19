@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:naiki_mob/screens/login.dart';
 import 'package:naiki_mob/screens/menu.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,9 +14,14 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
+    return Provider(
+      create: (_) {
+        CookieRequest request = CookieRequest();
+        return request;
+      },
+      child: MaterialApp(
+        title: 'Naiki Football Shop',
+        theme: ThemeData(
         // This is the theme of your application.
         //
         // TRY THIS: Try running your application with "flutter run". You'll see
@@ -33,7 +41,8 @@ class MyApp extends StatelessWidget {
          primary: const Color.fromARGB(255, 60, 65, 74),
          secondary: const Color.fromARGB(255, 88, 95, 108))
       ),
-      home: MyHomePage(),
+        home: const LoginPage(),
+      ),
     );
   }
 }

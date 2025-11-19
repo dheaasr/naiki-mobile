@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:naiki_mob/screens/menu.dart';
+import 'package:naiki_mob/screens/product_entry_list.dart';
 import 'package:naiki_mob/screens/product_form.dart';
 
 class LeftDrawer extends StatelessWidget {
@@ -59,6 +60,17 @@ class LeftDrawer extends StatelessWidget {
               MaterialPageRoute(builder: (context) => const ProductFormPage()),
               );
             },
+          ),
+          ListTile(
+              leading: const Icon(Icons.add_reaction_rounded),
+              title: const Text('Product List'),
+              onTap: () {
+                  // Route to news list page
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProductEntryListPage()),
+                  );
+              },
           ),
         ],
       ),

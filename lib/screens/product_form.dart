@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:naiki_mob/screens/menu.dart';
 import 'package:naiki_mob/widgets/left_drawer.dart';
 
+import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+
 class ProductFormPage extends StatefulWidget {
   const ProductFormPage({super.key});
 
@@ -13,19 +17,20 @@ class _ProductFormPageState extends State<ProductFormPage> {
   final _formKey = GlobalKey<FormState>();
   String _name = "";
   String _description = "";
-  String _category = "Unisex";
+  String _category = "Gear";
   String _price = "0";
   String _thumbnail = "";
-  bool _isPromo = false;
+  bool _isFeatured = false;
 
-  final List<String> _categories = ['Men', 'Women', 'Kids', 'Unisex', 'Tools'];
+  final List<String> _categories = ['Men', 'Women', 'Gear'];
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Add Product Form')),
-        backgroundColor: const Color.fromARGB(255, 45, 58, 132),
+        backgroundColor: const Color.fromARGB(255, 58, 56, 55),
         foregroundColor: Colors.white,
       ),
       drawer: const LeftDrawer(),
@@ -172,10 +177,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: SwitchListTile(
                   title:
-                      const Text("Tandai sebagai produk yang sedang Promo"),
-                  value: _isPromo,
+                      const Text("Tandai sebagai Featured produk"),
+                  value: _isFeatured,
                   onChanged: (value) =>
-                      setState(() => _isPromo = value),
+                      setState(() => _isFeatured = value),
                 ),
               ),
 
@@ -187,40 +192,41 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     backgroundColor: MaterialStateProperty.all(
                         const Color.fromARGB(255, 45, 58, 132)),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Produk berhasil ditambahkan'),
-                          content: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Nama: $_name'),
-                                Text('Deskripsi: $_description'),
-                                Text('Kategori: $_category'),
-                                Text('Thumbnail: $_thumbnail'),
-                                Text('Harga: $_price'),
-                                Text('Promo: ${_isPromo ? "Ya" : "Tidak"}'),
-                              ],
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              child: const Text('OK'),
-                              onPressed: () {
-                              Navigator.pop(context); // nutup dialog
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => MyHomePage()),
-                                (route) => false, // hapus semua route lama biar ga bisa back
-                              );
-                            },
-                            ),
-                          ],
-                        ),
+                      // TODO: Replace the URL with your app's URL
+                      // To connect Android emulator with Django on localhost, use URL http://10.0.2.2/
+                      // If you using chrome,  use URL http://localhost:8000
+                      
+                      final response = await request.postJson(
+                        "http://localhost:8000/create-flutter/",
+                        jsonEncode({
+                          "name": _name,
+                          "description": _description,
+                          "thumbnail": _thumbnail,
+                          "category": _category,
+                          "price": _price,
+                          "is_featured": _isFeatured,
+                        }),
                       );
+                      if (context.mounted) {
+                        if (response['status'] == 'success') {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text("Product successfully saved!"),
+                          ));
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MyHomePage()),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text("Something went wrong, please try again."),
+                          ));
+                        }
+                      }
                     }
                   },
                   child: const Text("Save",
